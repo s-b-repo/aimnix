@@ -1,4 +1,4 @@
-# CS2 CV Aimbot Enhanced
+# aimnix V2.1
 
 **Advanced computer vision aimbot with team-based targeting, improved performance, and comprehensive training guide.**
 
