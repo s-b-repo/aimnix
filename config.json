@@ -1,0 +1,57 @@
+{
+    "aimbot": {
+        "fov": 120,
+        "smooth": 8.0,
+        "trigger_threshold": 0.22,
+        "max_fps": 60,
+        "confidence_threshold": 0.35,
+        "downscale_width": 1280,
+        "downscale_height": 720,
+        "target_team": "T",
+        "auto_shoot": true,
+        "human_like_delays": true
+    },
+    "controls": {
+        "team_toggle": "F7",
+        "aimbot_toggle": "F8",
+        "debug_toggle": "F9",
+        "status_key": "F10",
+        "emergency_stop": "Ctrl+F12"
+    },
+    "display": {
+        "debug_overlay": false,
+        "show_fps": true,
+        "show_team_detection": true,
+        "show_detection_boxes": true,
+        "show_crosshair": true,
+        "window_name": "CS2 Aimbot Enhanced"
+    },
+    "performance": {
+        "use_gpu": true,
+        "gpu_device": 0,
+        "cpu_threads": 4,
+        "memory_limit": 2048,
+        "batch_size": 1
+    },
+    "detection": {
+        "model_path": "cs2head.onnx",
+        "input_size": 640,
+        "nms_threshold": 0.4,
+        "team_detection": true,
+        "color_threshold": 50,
+        "unknown_team_action": "target"
+    },
+    "safety": {
+        "max_aim_speed": 100,
+        "reaction_delay_min": 50,
+        "reaction_delay_max": 200,
+        "miss_probability": 0.05,
+        "legit_mode": true
+    },
+    "logging": {
+        "enabled": true,
+        "log_file": "aimbot.log",
+        "log_level": "INFO",
+        "max_log_size": 10485760
+    }
+}

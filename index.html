@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS2 CV Aimbot Enhanced - Complete Solution</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e, #0f3460);
+            color: #ffffff;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 40px 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #00d4ff, #ff00ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            font-size: 1.2em;
+            color: #a0a0a0;
+            margin-bottom: 20px;
+        }
+        
+        .warning {
+            background: rgba(255, 193, 7, 0.2);
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .warning h3 {
+            color: #ffc107;
+            margin-bottom: 10px;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin: 40px 0;
+        }
+        
+        .feature-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        .feature-card h3 {
+            color: #00d4ff;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        
+        .feature-card ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .feature-card li {
+            margin: 8px 0;
+            padding-left: 20px;
+            position: relative;
+        }
+        
+        .feature-card li:before {
+            content: "✓";
+            color: #00ff88;
+            position: absolute;
+            left: 0;
+        }
+        
+        .download-section {
+            background: rgba(0, 212, 255, 0.1);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 40px 0;
+            text-align: center;
+        }
+        
+        .download-btn {
+            display: inline-block;
+            background: linear-gradient(45deg, #00d4ff, #0099cc);
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            margin: 10px;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .download-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(0, 212, 255, 0.3);
+        }
+        
+        .controls {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+        }
+        
+        .controls h3 {
+            color: #ff00ff;
+            margin-bottom: 20px;
+        }
+        
+        .control-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .control-item {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .key {
+            background: linear-gradient(45deg, #ff00ff, #cc00cc);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+        
+        .file-list {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+        }
+        
+        .file-list h3 {
+            color: #00ff88;
+            margin-bottom: 20px;
+        }
+        
+        .file-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #00d4ff;
+        }
+        
+        .file-item strong {
+            color: #00d4ff;
+        }
+        
+        .setup-steps {
+            background: rgba(0, 255, 136, 0.1);
+            border-radius: 15px;
+            padding: 25px;
+            margin: 30px 0;
+        }
+        
+        .setup-steps h3 {
+            color: #00ff88;
+            margin-bottom: 20px;
+        }
+        
+        .step {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 10px;
+            border-left: 4px solid #00ff88;
+        }
+        
+        .step-number {
+            background: #00ff88;
+            color: black;
+            padding: 5px 10px;
+            border-radius: 50%;
+            font-weight: bold;
+            display: inline-block;
+            margin-right: 10px;
+        }
+        
+        .code-block {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 50px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            color: #a0a0a0;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .features {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>CS2 CV Aimbot Enhanced</h1>
+            <div class="subtitle">Advanced Computer Vision Aimbot with Team-Based Targeting</div>
+            <div style="font-size: 0.9em; color: #a0a0a0;">
+                Version 2.0 | Memory-Zero Design | Educational Use Only
+            </div>
+        </header>
+
+        <div class="warning">
+            <h3>⚠️ IMPORTANT DISCLAIMER</h3>
+            <p>This software is provided for <strong>educational and research purposes only</strong>. Using this in online games may result in permanent account bans. The authors are not responsible for any damages or bans resulting from misuse. Always test in offline mode and use responsibly.</p>
+        </div>
+
+        <div class="features">
+            <div class="feature-card">
+                <h3>🎯 Team-Based Targeting</h3>
+                <ul>
+                    <li>Smart team detection (T/CT identification)</li>
+                    <li>F7 key to toggle target team</li>
+                    <li>Color-based team classification</li>
+                    <li>Configurable default team preference</li>
+                    <li>Unknown team handling options</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <h3>⚡ Performance Enhancements</h3>
+                <ul>
+                    <li>Multi-backend screen capture</li>
+                    <li>GPU acceleration (CUDA support)</li>
+                    <li>Frame rate limiting (configurable)</li>
+                    <li>Optimized processing pipeline</li>
+                    <li>Reduced memory footprint</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <h3>🎮 Enhanced Controls</h3>
+                <ul>
+                    <li>F7: Toggle target team (T/CT)</li>
+                    <li>F8: Enable/disable aimbot</li>
+                    <li>F9: Debug overlay toggle</li>
+                    <li>F10: Status and configuration</li>
+                    <li>Multiple keyboard support</li>
+                </ul>
+            </div>
+
+            <div class="feature-card">
+                <h3>📊 Debug & Monitoring</h3>
+                <ul>
+                    <li>Real-time FPS display</li>
+                    <li>Detection visualization</li>
+                    <li>Team classification feedback</li>
+                    <li>Performance metrics</li>
+                    <li>Target selection logic display</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="controls">
+            <h3>🎮 In-Game Controls</h3>
+            <div class="control-grid">
+                <div class="control-item">
+                    <div class="key">F7</div>
+                    <div>Toggle Target Team</div>
+                    <small>Switch between T/CT targeting</small>
+                </div>
+                <div class="control-item">
+                    <div class="key">F8</div>
+                    <div>Toggle Aimbot</div>
+                    <small>Enable/disable aimbot</small>
+                </div>
+                <div class="control-item">
+                    <div class="key">F9</div>
+                    <div>Debug Overlay</div>
+                    <small>Show detection visualization</small>
+                </div>
+                <div class="control-item">
+                    <div class="key">F10</div>
+                    <div>Show Status</div>
+                    <small>Display current configuration</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="setup-steps">
+            <h3>🚀 Quick Setup Guide</h3>
+            
+            <div class="step">
+                <span class="step-number">1</span>
+                <strong>Run Automated Setup</strong>
+                <div class="code-block">chmod +x setup.sh && ./setup.sh</div>
+            </div>
+
+            <div class="step">
+                <span class="step-number">2</span>
+                <strong>Collect Training Data</strong>
+                <div class="code-block">python3 collect_data.py --rate 5 --duration 10</div>
+            </div>
+
+            <div class="step">
+                <span class="step-number">3</span>
+                <strong>Train Your Model</strong>
+                <div class="code-block">python3 train_model.py --all --epochs 100</div>
+            </div>
+
+            <div class="step">
+                <span class="step-number">4</span>
+                <strong>Run Enhanced Aimbot</strong>
+                <div class="code-block">sudo ./cs2-aimbot-enhanced</div>
+            </div>
+        </div>
+
+        <div class="file-list">
+            <h3>📁 Complete Package Contents</h3>
+            
+            <div class="file-item">
+                <strong>cs2-cv-aimbot-improved.cpp</strong> - Enhanced aimbot source code with team targeting
+            </div>
+            
+            <div class="file-item">
+                <strong>TRAINING_GUIDE.md</strong> - Comprehensive training and setup documentation
+            </div>
+            
+            <div class="file-item">
+                <strong>setup.sh</strong> - Automated installation and configuration script
+            </div>
+            
+            <div class="file-item">
+                <strong>train_model.py</strong> - Automated model training with YOLOv8
+            </div>
+            
+            <div class="file-item">
+                <strong>collect_data.py</strong> - Automated data collection from gameplay
+            </div>
+            
+            <div class="file-item">
+                <strong>config.json</strong> - Configuration file for customization
+            </div>
+            
+            <div class="file-item">
+                <strong>README_ENHANCED.md</strong> - Enhanced documentation and features overview
+            </div>
+            
+            <div class="file-item">
+                <strong>ENHANCEMENT_SUMMARY.md</strong> - Detailed summary of all improvements
+            </div>
+        </div>
+
+        <div class="download-section">
+            <h3>📥 Download Complete Package</h3>
+            <p>Get all the enhanced files in one package</p>
+            
+            <a href="cs2-cv-aimbot-improved.cpp" class="download-btn" download>
+                📄 Enhanced Aimbot (C++)
+            </a>
+            
+            <a href="TRAINING_GUIDE.md" class="download-btn" download>
+                📚 Training Guide
+            </a>
+            
+            <a href="setup.sh" class="download-btn" download>
+                🔧 Setup Script
+            </a>
+            
+            <a href="train_model.py" class="download-btn" download>
+                🤖 Training Script
+            </a>
+            
+            <a href="collect_data.py" class="download-btn" download>
+                📊 Data Collection
+            </a>
+        </div>
+
+        <div style="background: rgba(255, 255, 255, 0.1); border-radius: 15px; padding: 25px; margin: 30px 0;">
+            <h3 style="color: #ff00ff; margin-bottom: 20px;">🔬 Technical Specifications</h3>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+                <div>
+                    <strong>Detection Model:</strong><br>
+                    YOLOv8 (1-class: head)<br>
+                    Input: 640x640<br>
+                    Confidence: 0.35+
+                </div>
+                
+                <div>
+                    <strong>Performance:</strong><br>
+                    25-60 FPS (hardware dependent)<br>
+                    <5ms inference time<br>
+                    GPU acceleration available
+                </div>
+                
+                <div>
+                    <strong>System Requirements:</strong><br>
+                    Linux OS<br>
+                    8GB+ RAM<br>
+                    NVIDIA GPU (optional)
+                </div>
+                
+                <div>
+                    <strong>Anti-Detection:</strong><br>
+                    Memory-zero design<br>
+                    Pixel-only analysis<br>
+                    No game memory access
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p><strong>CS2 CV Aimbot Enhanced v2.0</strong></p>
+            <p>Advanced computer vision research tool with team-based targeting</p>
+            <p style="margin-top: 20px; font-size: 0.9em;">
+                Created for educational and research purposes • Use responsibly • Follow game ToS
+            </p>
+        </footer>
+    </div>
+</body>
+</html>
