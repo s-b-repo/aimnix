@@ -1,0 +1,66 @@
+{
+    "aimbot": {
+        "fov": 120,
+        "smooth": 8.0,
+        "trigger_threshold": 0.22,
+        "max_fps": 60,
+        "confidence_threshold": 0.35,
+        "downscale_width": 1280,
+        "downscale_height": 720,
+        "target_team": "T",
+        "auto_shoot": true,
+        "aim_mode": 0,
+        "bhop_enabled": false,
+        "dead_zone": 3
+    },
+    "controls": {
+        "team_toggle": "F7",
+        "aimbot_toggle": "F8",
+        "aim_mode_toggle": "F5",
+        "bhop_toggle": "F6",
+        "debug_toggle": "F9",
+        "status_key": "F10",
+        "config_reload": "F11",
+        "panic_key": "F12"
+    },
+    "display": {
+        "debug_overlay": false,
+        "show_fps": true,
+        "show_team_detection": true,
+        "show_detection_boxes": true,
+        "show_crosshair": true,
+        "overlay_monitor": 1
+    },
+    "performance": {
+        "use_gpu": true,
+        "gpu_device": 0,
+        "cpu_threads": 4,
+        "center_crop_ratio": 0.5
+    },
+    "detection": {
+        "model_path": "cs2head.onnx",
+        "input_size": 640,
+        "nms_threshold": 0.4,
+        "color_threshold": 50
+    },
+    "safety": {
+        "max_aim_speed": 100,
+        "reaction_delay_min": 50,
+        "reaction_delay_max": 200,
+        "miss_probability": 0.05
+    },
+    "recoil": {
+        "enabled": true,
+        "strength": 2.5,
+        "delay_ms": 60
+    },
+    "stealth": {
+        "jitter_intensity": 0.8,
+        "overshoot_chance": 0.15,
+        "overshoot_amount": 0.12,
+        "speed_variance": 0.2,
+        "min_fire_interval_ms": 80,
+        "aim_offset_range": 0.15,
+        "target_switch_penalty": 0.3
+    }
+}

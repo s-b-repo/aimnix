@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS2 CV Aimbot v3.0</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a1a, #0d1b2a, #1b2838);
+            color: #e0e0e0;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        .container { max-width: 1100px; margin: 0 auto; padding: 20px; }
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 30px 0;
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        h1 {
+            font-size: 2.6em;
+            background: linear-gradient(45deg, #00d4ff, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .subtitle { font-size: 1.1em; color: #888; margin-top: 8px; }
+        .warning {
+            background: rgba(255,193,7,0.1);
+            border: 1px solid rgba(255,193,7,0.4);
+            border-radius: 10px;
+            padding: 16px;
+            margin: 20px 0;
+            text-align: center;
+            color: #ffc107;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin: 24px 0;
+        }
+        .card {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid rgba(255,255,255,0.08);
+            transition: transform 0.2s;
+        }
+        .card:hover { transform: translateY(-3px); background: rgba(255,255,255,0.07); }
+        .card h3 { color: #00d4ff; margin-bottom: 12px; font-size: 1.15em; }
+        .card ul { list-style: none; padding: 0; }
+        .card li {
+            margin: 6px 0;
+            padding-left: 18px;
+            position: relative;
+            font-size: 0.95em;
+        }
+        .card li:before {
+            content: "+";
+            color: #00ff88;
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+        }
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 10px;
+            margin: 16px 0;
+        }
+        .ctrl {
+            background: rgba(0,0,0,0.3);
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .key {
+            background: linear-gradient(45deg, #a855f7, #7c3aed);
+            color: white;
+            padding: 4px 14px;
+            border-radius: 16px;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 6px;
+            font-size: 0.9em;
+        }
+        .ctrl small { display: block; color: #888; font-size: 0.8em; }
+        .section {
+            background: rgba(255,255,255,0.05);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .section h3 { color: #a855f7; margin-bottom: 14px; }
+        .code {
+            background: rgba(0,0,0,0.4);
+            border-radius: 8px;
+            padding: 14px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            overflow-x: auto;
+        }
+        .step {
+            background: rgba(0,0,0,0.2);
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 3px solid #00ff88;
+        }
+        .step-num {
+            background: #00ff88;
+            color: black;
+            padding: 2px 8px;
+            border-radius: 50%;
+            font-weight: bold;
+            margin-right: 8px;
+            font-size: 0.85em;
+        }
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            color: #666;
+            font-size: 0.9em;
+        }
+        @media (max-width: 768px) {
+            .container { padding: 10px; }
+            h1 { font-size: 1.8em; }
+            .grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>CS2 CV Aimbot v3.0</h1>
+            <div class="subtitle">External Computer Vision Aimbot - Linux</div>
+        </header>
+
+        <div class="warning">
+            This software is for educational and research purposes only. Using this in online games may result in permanent account bans.
+        </div>
+
+        <div class="grid">
+            <div class="card">
+                <h3>Aim Engine</h3>
+                <ul>
+                    <li>YOLOv8 head detection via ONNX Runtime</li>
+                    <li>Assist mode (smooth) and Lock mode (snap)</li>
+                    <li>Cubic ease-out smoothing curve</li>
+                    <li>Dead zone to avoid micro-adjustments</li>
+                    <li>Weighted target scoring (distance + confidence)</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h3>Stealth System</h3>
+                <ul>
+                    <li>Micro-jitter on aim path (Gaussian noise)</li>
+                    <li>Random overshoot and correction</li>
+                    <li>Variable aim speed per frame</li>
+                    <li>Per-target aim offset randomization</li>
+                    <li>Target switch penalty (stickiness)</li>
+                    <li>Randomized reaction delays</li>
+                    <li>Configurable miss probability</li>
+                    <li>Fire rate limiter</li>
+                    <li>Random process name masking (27 common names)</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h3>Anti-Recoil</h3>
+                <ul>
+                    <li>Automatic downward compensation during fire</li>
+                    <li>Ramps up over sustained bursts</li>
+                    <li>Gaussian noise on compensation values</li>
+                    <li>Configurable strength and timing</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h3>Team Detection</h3>
+                <ul>
+                    <li>HSV body-region sampling (not head)</li>
+                    <li>Pixel-level red/blue classification</li>
+                    <li>Configurable saturation threshold</li>
+                    <li>Targets unknown team by default</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h3>Performance</h3>
+                <ul>
+                    <li>Center-screen crop for faster inference</li>
+                    <li>CUDA GPU acceleration</li>
+                    <li>Deadline-based frame timing</li>
+                    <li>GStreamer X11/Wayland capture</li>
+                    <li>Configurable downscale resolution</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h3>Extra Features</h3>
+                <ul>
+                    <li>Bunny hop auto-jump</li>
+                    <li>Panic key (F12) - instant kill switch</li>
+                    <li>Config hot-reload (F11)</li>
+                    <li>Status overlay on secondary monitor</li>
+                    <li>Auto train/val dataset splitting</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>Controls</h3>
+            <div class="controls-grid">
+                <div class="ctrl"><div class="key">F5</div><div>Aim Mode</div><small>Assist / Lock</small></div>
+                <div class="ctrl"><div class="key">F6</div><div>Bunny Hop</div><small>Toggle bhop</small></div>
+                <div class="ctrl"><div class="key">F7</div><div>Team</div><small>T / CT target</small></div>
+                <div class="ctrl"><div class="key">F8</div><div>Aimbot</div><small>On / Off</small></div>
+                <div class="ctrl"><div class="key">F9</div><div>Debug</div><small>Overlay toggle</small></div>
+                <div class="ctrl"><div class="key">F10</div><div>Status</div><small>Show all states</small></div>
+                <div class="ctrl"><div class="key">F11</div><div>Reload</div><small>Hot-reload config</small></div>
+                <div class="ctrl"><div class="key">F12</div><div>Panic</div><small>Kill everything</small></div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h3>Quick Setup</h3>
+            <div class="step"><span class="step-num">1</span><strong>Run setup</strong><div class="code">chmod +x setup.sh && ./setup.sh</div></div>
+            <div class="step"><span class="step-num">2</span><strong>Collect data</strong><div class="code">python3 collect_data.py --rate 5 --duration 10</div></div>
+            <div class="step"><span class="step-num">3</span><strong>Label data</strong> using <a href="https://www.makesense.ai/" style="color:#00d4ff">makesense.ai</a> or CVAT</div>
+            <div class="step"><span class="step-num">4</span><strong>Train model</strong><div class="code">python3 train_model.py --all --epochs 100</div></div>
+            <div class="step"><span class="step-num">5</span><strong>Run</strong><div class="code">sudo ./cs2-aimbot-enhanced</div></div>
+        </div>
+
+        <div class="section">
+            <h3>Files</h3>
+            <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));">
+                <div class="card" style="padding:12px"><strong style="color:#00d4ff">cs2-cv-aimbot-improved.cpp</strong><br>Main aimbot source</div>
+                <div class="card" style="padding:12px"><strong style="color:#00d4ff">collect_data.py</strong><br>Screenshot capture tool</div>
+                <div class="card" style="padding:12px"><strong style="color:#00d4ff">train_model.py</strong><br>YOLOv8 training pipeline</div>
+                <div class="card" style="padding:12px"><strong style="color:#00d4ff">config.json</strong><br>Runtime configuration</div>
+                <div class="card" style="padding:12px"><strong style="color:#00d4ff">setup.sh</strong><br>Automated setup script</div>
+            </div>
+        </div>
+
+        <footer>
+            CS2 CV Aimbot v3.0 &mdash; External computer vision research tool &mdash; Educational use only
+        </footer>
+    </div>
+</body>
+</html>
