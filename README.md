@@ -11,26 +11,26 @@
 
 ## 🚀 Key Enhancements
 
-### ✅ Team-Based Targeting
+###  Team-Based Targeting
 - **Smart Team Detection**: Automatically identifies Terrorist vs Counter-Terrorist models
 - **Toggle System**: F7 key to switch between targeting T/CT teams
 - **Color Analysis**: Uses HSV color space for reliable team identification
 - **Configurable Default**: Set preferred default team to target
 
-### ✅ Performance Improvements
+###  Performance Improvements
 - **Multi-Backend Support**: V4L2, GStreamer, FFmpeg capture methods
 - **GPU Acceleration**: Automatic CUDA detection and utilization
 - **Frame Rate Limiting**: Configurable FPS cap for stable performance
 - **Optimized Processing**: Downscaled inference with maintained accuracy
 - **Memory Management**: Reduced memory footprint and faster processing
 
-### ✅ Enhanced User Experience
+###  Enhanced User Experience
 - **Debug Overlay**: Real-time visualization of detection and targeting
 - **Status System**: F10 key displays current configuration and status
 - **Performance Monitoring**: Live FPS and processing time display
 - **Improved Controls**: Intuitive keybindings with visual feedback
 
-### ✅ Advanced Configuration
+###  Advanced Configuration
 - **Flexible Settings**: Easy-to-modify configuration constants
 - **Model Optimization**: Support for quantized and optimized ONNX models
 - **Custom Resolutions**: Adaptable to different screen resolutions
@@ -120,15 +120,15 @@ static const bool  TARGET_T_BY_DEFAULT = true; // Default: target Terrorists
 
 | Feature | Original | Enhanced |
 |---------|----------|----------|
-| **Team Targeting** | ❌ | ✅ Smart detection |
-| **GPU Acceleration** | ❌ | ✅ CUDA support |
-| **Multi-Backend Capture** | ❌ | ✅ V4L2/GStreamer/FFmpeg |
-| **Debug Overlay** | ❌ | ✅ Real-time visualization |
-| **Performance Monitoring** | ❌ | ✅ FPS and metrics display |
-| **Enhanced Controls** | ❌ | ✅ F7-F10 keybindings |
-| **Improved UI** | ❌ | ✅ Better visual feedback |
-| **Comprehensive Training** | ❌ | ✅ Complete guide included |
-| **Setup Automation** | ❌ | ✅ Automated setup script |
+| **Team Targeting** | ❌ |  Smart detection |
+| **GPU Acceleration** | ❌ |  CUDA support |
+| **Multi-Backend Capture** | ❌ |  V4L2/GStreamer/FFmpeg |
+| **Debug Overlay** | ❌ |  Real-time visualization |
+| **Performance Monitoring** | ❌ |  FPS and metrics display |
+| **Enhanced Controls** | ❌ |  F7-F10 keybindings |
+| **Improved UI** | ❌ |  Better visual feedback |
+| **Comprehensive Training** | ❌ |  Complete guide included |
+| **Setup Automation** | ❌ |  Automated setup script |
 
 ---
 
