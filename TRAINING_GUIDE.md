@@ -35,8 +35,19 @@ cd aimnix
 python3 -m venv cs2_training_env
 source cs2_training_env/bin/activate
 pip install --upgrade pip
-pip install ultralytics opencv-python numpy pillow mss keyboard
+
+# CPU-only torch (small download, ~200MB)
+pip install torch --index-url https://download.pytorch.org/whl/cpu
+
+# Training dependencies
+pip install ultralytics opencv-python-headless numpy pillow mss keyboard
 ```
+
+Note: CPU-only torch is used for training to avoid downloading ~1.5GB of
+NVIDIA CUDA packages. If you need GPU-accelerated training, replace the
+torch pip command with `pip install torch` (default PyPI index includes
+CUDA, but the download is ~1.8GB+). The C++ aimbot binary uses ONNX
+Runtime for inference and falls back to CPU if CUDA is unavailable.
 
 ---
 

@@ -175,7 +175,10 @@ source cs2_training_env/bin/activate
 
 echo "[+] Installing Python packages..."
 pip install --upgrade pip --quiet
-pip install ultralytics opencv-python numpy pillow mss keyboard --quiet
+# Install CPU-only torch to avoid downloading ~1.5GB of NVIDIA CUDA packages
+# For GPU training, replace with: pip install torch --quiet
+pip install torch --index-url https://download.pytorch.org/whl/cpu --quiet 2>/dev/null || pip install torch --quiet
+pip install ultralytics opencv-python-headless numpy pillow mss keyboard --quiet
 echo "[+] Python packages installed"
 
 echo ""
