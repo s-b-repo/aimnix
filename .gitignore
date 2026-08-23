@@ -1,3 +1,13 @@
 __pycache__/
 *.pyc
 *.pyo
+
+# Build artifacts
+cs2-aimbot-enhanced
+third_party/
+
+# Python venv
+cs2_training_env/
+
+# Training runs
+runs/

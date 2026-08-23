@@ -1,487 +1,315 @@
-# CS2 CV Aimbot - Complete Training Guide
+# CS2 Head Detection Model Training Guide
 
-## Overview
-This enhanced CS2 Computer Vision aimbot includes team-based targeting, improved performance, and comprehensive debug features. The system uses machine learning to detect enemy heads and can distinguish between Terrorist and Counter-Terrorist teams.
+This guide covers the complete training pipeline for the aimnix CS2 CV aimbot, from data collection to model export.
 
-## 🔧 Enhanced Features
+---
 
-### Team Toggle System
-- **F7 Key**: Toggle between targeting Terrorists (T) or Counter-Terrorists (CT)
-- **Smart Targeting**: Uses color analysis to identify team affiliation
-- **Default Behavior**: Configurable default team to target
+## Table of Contents
 
-### Performance Improvements
-- **Optimized Screen Capture**: Multiple backend support (V4L2, GStreamer, FFmpeg)
-- **GPU Acceleration**: Automatic CUDA detection and usage
-- **Frame Rate Limiting**: Configurable FPS cap (default 60 FPS)
-- **Downscaled Processing**: Faster inference with maintained accuracy
+1. [Prerequisites](#prerequisites)
+2. [Step 1: Data Collection](#step-1-data-collection)
+3. [Step 2: Data Labeling](#step-2-data-labeling)
+4. [Step 3: Dataset Preparation](#step-3-dataset-preparation)
+5. [Step 4: Model Training](#step-4-model-training)
+6. [Step 5: Model Export](#step-5-model-export)
+7. [Step 6: Model Validation](#step-6-model-validation)
+8. [Complete Pipeline](#complete-pipeline)
+9. [Performance Optimization](#performance-optimization)
 
-### Debug & Monitoring
-- **Real-time FPS Display**: Performance monitoring
-- **Team Detection Overlay**: Visual feedback for team identification
-- **Status Indicators**: Current targeting mode and system state
-- **Enhanced Visual Feedback**: Different colors for different teams
+---
 
-## 📋 Prerequisites
+## Prerequisites
 
 ### System Requirements
-- **OS**: Linux (Ubuntu 20.04+, Arch Linux, or similar)
-- **CPU**: Modern multi-core processor (4+ cores recommended)
-- **RAM**: 8GB minimum, 16GB recommended
-- **GPU**: NVIDIA GPU with CUDA support (optional but recommended)
-- **Storage**: 2GB free space for models and dependencies
+- Linux (Ubuntu 20.04+, Arch Linux, EndeavourOS, Fedora, or derivatives)
+- 4+ CPU cores, 8GB+ RAM
+- NVIDIA GPU with CUDA (recommended for training speed)
+- 2GB+ free disk space for models and dependencies
 
-### Dependencies Installation
+### Installed Dependencies
+The `setup.sh` script handles system-level dependencies (OpenCV, libevdev, ONNX Runtime, GStreamer, CUDA). It also creates a Python virtual environment at `cs2_training_env/` with all training dependencies.
 
-#### Ubuntu/Debian
+If you need to set up the Python environment manually:
 ```bash
-sudo apt update
-sudo apt install -y \
-    build-essential \
-    cmake \
-    libopencv-dev \
-    libonnxruntime-dev \
-    libevdev-dev \
-    libcuda-dev \
-    nvidia-cuda-toolkit
-```
-
-#### Arch Linux
-```bash
-sudo pacman -S \
-    base-devel \
-    cmake \
-    opencv \
-    onnxruntime \
-    libevdev \
-    cuda
-```
-
-### Python Environment Setup
-```bash
-# Create virtual environment
+cd aimnix
 python3 -m venv cs2_training_env
 source cs2_training_env/bin/activate
-
-# Install training dependencies
 pip install --upgrade pip
-pip install \
-    ultralytics \
-    opencv-python \
-    numpy \
-    pillow \
-    matplotlib \
-    tensorboard \
-    roboflow
+pip install ultralytics opencv-python numpy pillow mss keyboard
 ```
 
-## 🎯 Training Your Custom Model
+---
 
-### Step 1: Data Collection
+## Step 1: Data Collection
 
-#### Method 1: Automated Screenshot Capture
+### Method 1: Automated Screenshot Capture (Recommended)
+
+Use the built-in `collect_data.py` script:
 ```bash
-# Create dataset structure
-mkdir -p cs2_dataset/{images,labels}
+source cs2_training_env/bin/activate
+python3 collect_data.py --rate 5 --duration 10
+```
 
-# Start automated capture (run while playing CS2)
+Options:
+- `--rate` / `-r`: Capture rate in FPS (default: 5)
+- `--duration` / `-d`: Max duration in minutes, 0 = unlimited (default: 0)
+- `--quality` / `-q`: JPEG quality 1-100 (default: 85)
+- `--output` / `-o`: Output directory (default: `cs2_dataset/images/train`)
+- `--region`: Capture region as x,y,w,h (default: full screen)
+- `--val-split`: Fraction of frames to val/ (default: 0.15)
+
+Controls:
+- **F9**: Start/stop capture
+- **ESC**: Exit
+
+The script automatically:
+- Detects duplicate frames (via hash) and skips them
+- Checks available disk space
+- Splits data into train/val directories
+- Names files with timestamps for uniqueness
+
+### Method 2: FFmpeg Screen Recording
+
+```bash
+# Record at 30 FPS, then extract frames
 ffmpeg -video_size 1920x1080 -framerate 30 -f x11grab -i :0 \
-    -vf fps=30 -q:v 2 cs2_dataset/images/frame_%04d.jpg
+    -vf fps=5 cs2_dataset/raw/frame_%04d.jpg
 ```
 
-#### Method 2: Manual Screenshot Collection
-1. Play CS2 in windowed/borderless mode
-2. Take screenshots when enemies are visible
-3. Save to `cs2_dataset/images/` folder
-4. Aim for 500-1000 diverse images
+### Labeling Guidelines
+- Capture diverse scenarios: different maps, angles, distances, lighting
+- Aim for 500-1000+ images of enemy head visibility
+- Include some non-target frames (no enemies visible) for negative samples
 
-### Step 2: Data Labeling
+---
 
-#### Using CVAT (Recommended)
+## Step 2: Data Labeling
+
+### Option A: MakeSense.ai (Web-based, Easiest)
+
+1. Visit [makesense.ai](https://www.makesense.ai/)
+2. Upload your collected images from `cs2_dataset/images/train/`
+3. Create a "head" label
+4. Draw bounding boxes around every visible enemy head
+5. Export as **YOLO format**
+6. Download and extract into `cs2_dataset/labels/train/`
+
+### Option B: CVAT (Local Installation)
+
 ```bash
-# Install CVAT
 docker pull cvat/server
 docker run -d -p 8080:8080 cvat/server
-
 # Access at http://localhost:8080
-# Upload images and label heads with bounding boxes
-# Export as YOLO format
 ```
 
-#### Using Makesense.ai (Web-based)
-1. Visit https://www.makesense.ai/
-2. Upload your images
-3. Label heads with bounding boxes
-4. Export in YOLO format
-5. Save labels to `cs2_dataset/labels/`
+1. Create a new project, upload images
+2. Create "head" label
+3. Annotate all frames
+4. Export as YOLO format
 
-#### Labeling Guidelines
-- **Label Only Heads**: Focus on the head region
-- **Consistent Bounding**: Include entire head with some margin
-- **Multiple Angles**: Include different viewing angles
-- **Various Distances**: Near, medium, and far targets
-- **Different Maps**: Train on multiple CS2 maps
+### Labeling Best Practices
+- Include the entire head with a small margin
+- Label partially visible heads (they train the model on occlusion)
+- Be consistent — similar head positions = similar box sizes
+- Don't label friendly players (only enemies)
 
-### Step 3: Dataset Preparation
+---
 
-#### Create Data Configuration
+## Step 3: Dataset Preparation
+
+The training script auto-generates the YAML config and dataset structure. You can also do it manually:
+
 ```yaml
 # cs2_dataset/data.yaml
-path: ./cs2_dataset
+path: /home/cortix/Templates/aimnix/cs2_dataset
 train: images/train
 val: images/val
 test: images/test
 
 nc: 1  # number of classes
-names: ['head']  # class names
+names: ['head']
 ```
 
-#### Split Dataset
+The script creates this automatically. Directory structure:
+```
+cs2_dataset/
+  data.yaml
+  images/
+    train/   <- annotated training images
+    val/     <- validation images (auto-split if empty)
+    test/    <- test images
+  labels/
+    train/   <- YOLO .txt annotations
+    val/     <- validation annotations
+    test/    <- test annotations
+```
+
+### Manual Split
 ```python
-import os
-import shutil
-import random
-
-def split_dataset(source_dir, train_ratio=0.8, val_ratio=0.1):
-    images_dir = os.path.join(source_dir, 'images')
-    labels_dir = os.path.join(source_dir, 'labels')
-    
-    # Get all image files
-    images = [f for f in os.listdir(images_dir) if f.endswith(('.jpg', '.png'))]
-    random.shuffle(images)
-    
-    # Calculate split indices
-    total = len(images)
-    train_end = int(total * train_ratio)
-    val_end = train_end + int(total * val_ratio)
-    
-    # Create directories
-    for split in ['train', 'val', 'test']:
-        os.makedirs(os.path.join(source_dir, 'images', split), exist_ok=True)
-        os.makedirs(os.path.join(source_dir, 'labels', split), exist_ok=True)
-    
-    # Split files
-    for i, image in enumerate(images):
-        label = image.replace('.jpg', '.txt').replace('.png', '.txt')
-        
-        if i < train_end:
-            split = 'train'
-        elif i < val_end:
-            split = 'val'
-        else:
-            split = 'test'
-        
-        # Move image and label
-        shutil.move(os.path.join(images_dir, image),
-                   os.path.join(source_dir, 'images', split, image))
-        if os.path.exists(os.path.join(labels_dir, label)):
-            shutil.move(os.path.join(labels_dir, label),
-                       os.path.join(source_dir, 'labels', split, label))
-
-split_dataset('cs2_dataset')
+# Auto-split is built into train_model.py --split
+# Manual alternative:
+from train_model import CS2ModelTrainer
+trainer = CS2ModelTrainer()
+trainer.auto_split(val_ratio=0.15, seed=42)
 ```
 
-### Step 4: Model Training
+---
 
-#### Basic Training
+## Step 4: Model Training
+
+### Quick Training
 ```bash
-# Train YOLOv8n model
-yolo train \
-    data=cs2_dataset/data.yaml \
-    model=yolov8n.yaml \
-    epochs=100 \
-    imgsz=640 \
-    batch=16 \
-    name=cs2_head_detector \
-    device=0  # GPU device ID
+source cs2_training_env/bin/activate
+python3 train_model.py --train --epochs 100 --model n
 ```
 
-#### Advanced Training Options
+### Full Pipeline (Setup + Split + Check + Train + Export + Validate)
 ```bash
-# With augmentation and optimization
-yolo train \
-    data=cs2_dataset/data.yaml \
-    model=yolov8n.yaml \
-    epochs=150 \
-    imgsz=640 \
-    batch=32 \
-    name=cs2_head_detector_advanced \
-    device=0 \
-    augment=True \
-    hsv_h=0.015 \
-    hsv_s=0.7 \
-    hsv_v=0.4 \
-    degrees=10 \
-    translate=0.1 \
-    scale=0.5 \
-    shear=10 \
-    perspective=0.0 \
-    flipud=0.0 \
-    fliplr=0.5 \
-    mosaic=1.0 \
-    mixup=0.0 \
-    copy_paste=0.0
+python3 train_model.py --all --epochs 100
 ```
 
-#### Monitor Training
+### Command Options
+| Option | Description | Default |
+|--------|-------------|---------|
+| `--epochs` | Number of training epochs | 100 |
+| `--model` | YOLO model size: n/s/m/l/x | n |
+| `--device` | GPU device ID or "cpu" | 0 |
+| `--batch` | Batch size | 16 |
+| `--lr` | Initial learning rate | 0.01 |
+| `--resume` | Resume from last checkpoint | off |
+| `--val-ratio` | Val split ratio for `--split` | 0.15 |
+| `--setup` | Create dataset structure | off |
+| `--split` | Auto-split train into train+val | off |
+| `--check` | Check dataset integrity | off |
+| `--train` | Train the model | off |
+| `--export` | Export to ONNX | off |
+| `--validate` | Validate exported model | off |
+| `--all` | Run full pipeline | off |
+
+### Model Size Recommendations
+- **n (nano)**: Fastest, smallest, good for CPU. Use if GPU not available.
+- **s (small)**: Good balance of speed and accuracy.
+- **m (medium)**: Better accuracy, more compute.
+- **l/x (large/xlarge)**: Best accuracy, very slow training.
+
+### Monitoring Training
 ```bash
-# View training progress
 tensorboard --logdir runs/detect
 # Open browser to http://localhost:6006
 ```
 
-### Step 5: Model Export
+---
 
-#### Export to ONNX
+## Step 5: Model Export
+
+The `--export` flag (or `--all`) automatically exports the best trained weights to ONNX:
+
 ```bash
-# Export best model
-yolo export \
-    model=runs/detect/cs2_head_detector/weights/best.pt \
-    format=onnx \
-    imgsz=640 \
-    opset=12 \
-    optimize=True
-
-# Copy to aimbot directory
-cp runs/detect/cs2_head_detector/weights/best.onnx cs2head.onnx
+python3 train_model.py --export
+# Output: cs2head.onnx (YOLO format, opset 12, simplified)
 ```
 
-#### Optimize Model (Optional)
+This will:
+1. Find the best weights from the latest training run
+2. Export to ONNX format with imgsz=640
+3. Copy the result to `cs2head.onnx` in the project root
+
+The aimbot binary automatically loads `cs2head.onnx` at startup.
+
+### Manual Export
+```python
+from ultralytics import YOLO
+model = YOLO("runs/detect/cs2_head_n/weights/best.pt")
+model.export(format="onnx", imgsz=640, opset=12, simplify=True)
+# Output: best.onnx
+import shutil; shutil.copy("best.onnx", "cs2head.onnx")
+```
+
+---
+
+## Step 6: Model Validation
+
+```bash
+python3 train_model.py --validate
+```
+
+This checks:
+- ONNX model loads correctly
+- Runs inference on validation samples
+- Reports detection counts for sanity checking
+
+---
+
+## Complete Pipeline
+
+The simplest way to train from scratch:
+
+```bash
+# 1. Collect data (in CS2 game)
+source cs2_training_env/bin/activate
+python3 collect_data.py --rate 5 --duration 15
+
+# 2. Label data externally (makesense.ai), save labels to cs2_dataset/labels/train/
+
+# 3. Train and export (one command)
+python3 train_model.py --all --epochs 100 --model n
+
+# 4. Run the aimbot
+sudo ./cs2-aimbot-enhanced
+```
+
+---
+
+## Performance Optimization
+
+### ONNX Runtime Inference
+- The aimbot uses ONNX Runtime for inference
+- CUDA execution provider is used automatically if a GPU is available
+- Falls back to CPU if CUDA is not available
+- Center-screen cropping (`center_crop_ratio` in config.json) reduces input size for faster inference
+
+### Model Quantization (Advanced)
 ```python
 import onnx
 from onnxruntime.quantization import quantize_dynamic, QuantType
 
-# Load and optimize model
-model = onnx.load("cs2head.onnx")
-model = onnx.shape_inference.infer_shapes(model)
-onnx.save(model, "cs2head_optimized.onnx")
-
-# Quantize for better performance
+# Quantize for smaller size and faster inference
 quantize_dynamic(
-    "cs2head_optimized.onnx",
+    "cs2head.onnx",
     "cs2head_quantized.onnx",
     weight_type=QuantType.QUInt8
 )
+# Use cs2head_quantized.onnx as model_path in config.json
 ```
 
-## 🚀 Running the Enhanced Aimbot
-
-### Compilation
-```bash
-g++ -std=c++20 -O3 cs2-cv-aimbot-improved.cpp \
-    -lonnxruntime \
-    -lopencv_core \
-    -lopencv_imgproc \
-    -lopencv_highgui \
-    -levdev \
-    -o cs2-aimbot-enhanced
-```
-
-### System Setup
-```bash
-# Set up permissions (one-time setup)
-sudo usermod -aG video,input $USER
-sudo modprobe uinput
-sudo udevadm control --reload-rules
-
-# Reload groups (or restart system)
-newgrp input
-```
-
-### Launch Options
-```bash
-# Basic launch
-sudo ./cs2-aimbot-enhanced
-
-# With custom model
-sudo ./cs2-aimbot-enhanced --model=custom_model.onnx
-
-# With debug mode
-sudo ./cs2-aimbot-enhanced --debug
-```
-
-## 🎮 In-Game Controls
-
-| Key | Function |
-|-----|----------|
-| **F7** | Toggle target team (T/CT) |
-| **F8** | Enable/disable aimbot |
-| **F9** | Toggle debug overlay |
-| **F10** | Show current status |
-
-### Team Targeting Behavior
-- **T Mode**: Prioritizes terrorist-colored models (red/orange)
-- **CT Mode**: Prioritizes counter-terrorist-colored models (blue)
-- **Unknown Teams**: Targets all detected heads when team detection is uncertain
-
-## 📊 Performance Optimization
-
-### System Tuning
-```bash
-# CPU governor for performance
-echo performance | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
-
-# Increase GPU performance (NVIDIA)
-nvidia-smi -pm 1
-nvidia-smi -acp 0
-nvidia-smi -i 0 -ac 5000,1700
-
-# Optimize system for gaming
-echo 1 | sudo tee /proc/sys/kernel/sched_rt_runtime_us
-```
-
-### Game Settings
-- **Resolution**: Match capture resolution (1280x720 recommended)
-- **Display Mode**: Borderless Window
-- **V-Sync**: Disabled
-- **Anti-Aliasing**: Low or Off
-- **Shadows**: Low (improves head visibility)
-
-## 🔍 Troubleshooting
-
-### Common Issues
-
-#### Permission Denied
-```bash
-# Fix uinput permissions
-sudo chmod 666 /dev/uinput
-sudo usermod -aG input $USER
-```
-
-#### No Screen Capture
-```bash
-# Check available devices
-ls /dev/video*
-v4l2-ctl --list-devices
-
-# Test capture
-cv2.VideoCapture(0).read()
-```
-
-#### Model Not Loading
-```bash
-# Verify ONNX model
-python3 -c "
-import onnx
-model = onnx.load('cs2head.onnx')
-print(model.graph.input)
-print(model.graph.output)
-"
-```
-
-#### Poor Detection Accuracy
-1. **Retrain Model**: Collect more diverse data
-2. **Adjust Confidence**: Lower detection threshold
-3. **Check Lighting**: Ensure consistent lighting conditions
-4. **Update Model**: Use newer YOLO architecture
-
-### Debug Mode
-Enable debug overlay (F9) to see:
-- Real-time detection boxes
-- Team classification results
-- Performance metrics
-- Target selection logic
-
-## ⚠️ Legal and Safety Information
-
-### Terms of Use
-- **Educational Purpose**: This tool is for educational and research purposes only
-- **Game Violations**: Using this in online games may result in permanent bans
-- **Fair Play**: Respect other players and game developers
-- **Local Use**: Only use on local servers or with permission
-
-### Safety Guidelines
-1. **Test Offline**: Always test in offline mode first
-2. **Use Alt Account**: Never use on primary gaming account
-3. **Moderate Settings**: Avoid obvious cheating behavior
-4. **Stay Updated**: Keep up with game anti-cheat developments
-
-### Detection Avoidance
-- **Human-like Behavior**: Use realistic smoothing values
-- **Limited FOV**: Keep FOV reasonable (under 150px)
-- **Occasional Misses**: Don't achieve perfect accuracy
-- **Random Delays**: Add human-like reaction delays
-
-## 📈 Advanced Configuration
-
-### Customizing Behavior
-Edit the configuration section in `cs2-cv-aimbot-improved.cpp`:
-
-```cpp
-// Performance settings
-static const int   MAX_FPS = 60;           // Target FPS
-static const int   DOWNSCALE_WIDTH = 1280;  // Processing resolution
-static const int   DOWNSCALE_HEIGHT = 720;
-
-// Detection settings
-static const float DETECTION_CONFIDENCE = 0.35f;
-static const int   FOV = 120;              // Field of view in pixels
-
-// Aim settings
-static const float SMOOTH = 8.0f;          // Smoothing factor
-static const float TRIGGER = 0.22f;        // Trigger threshold
-```
-
-### Creating Custom Models
-```python
-# Advanced training script
-from ultralytics import YOLO
-import yaml
-
-# Load model
-model = YOLO('yolov8n.yaml')
-
-# Custom training with callbacks
-results = model.train(
-    data='cs2_dataset/data.yaml',
-    epochs=200,
-    imgsz=640,
-    batch=32,
-    name='cs2_advanced',
-    callbacks={
-        'on_train_epoch_end': lambda trainer: print(f"Epoch {trainer.epoch} completed"),
-        'on_fit_epoch_end': lambda trainer: print(f"Metrics: {trainer.metrics}")
-    }
-)
-```
-
-## 🤝 Contributing
-
-### Development Setup
-```bash
-# Clone repository
-git clone https://github.com/yourusername/cs2-cv-aimbot-enhanced
-cd cs2-cv-aimbot-enhanced
-
-# Install development dependencies
-sudo apt install clang-format gdb valgrind
-
-# Code style
-clang-format -i *.cpp *.h
-```
-
-### Feature Requests
-- Multi-target tracking
-- Predictive aiming
-- Weapon-specific configurations
-- Advanced anti-detection methods
-- GUI configuration tool
-
-## 📚 Additional Resources
-
-### YOLO Documentation
-- [Ultralytics YOLOv8](https://docs.ultralytics.com/)
-- [YOLO Training Tips](https://docs.ultralytics.com/guides/yolo-common-issues/)
-- [Model Optimization](https://docs.ultralytics.com/modes/export/)
-
-### OpenCV Resources
-- [OpenCV Documentation](https://docs.opencv.org/)
-- [Computer Vision Tutorials](https://opencv-tutorial.readthedocs.io/)
-
-### CS2 Resources
-- [CS2 Console Commands](https://developer.valvesoftware.com/wiki/Console_Command_List)
-- [Game Optimization Guide](https://steamcommunity.com/sharedfiles/filedetails/?id=3002415546)
+### Training Tips
+- Start with `--model n` for quick iteration
+- 100 epochs is a good default; increase if accuracy is insufficient
+- Use data augmentation (enabled by default in the script)
+- Ensure diverse training data (different maps, lighting, angles)
+- Check val/ detection results with `--validate`
 
 ---
 
-**Disclaimer**: This software is provided as-is for educational purposes. The authors are not responsible for any damages, bans, or legal issues resulting from the use of this software. Use responsibly and in accordance with game terms of service.
+## Troubleshooting
+
+### Training Fails: "CUDA out of memory"
+- Reduce `--batch` size (try 8 or 4)
+- Use `--device cpu` for CPU-only training
+- Use a smaller model (`--model n`)
+
+### Training Fails: "No training images found"
+- Ensure images are in `cs2_dataset/images/train/`
+- Run `python3 train_model.py --setup` to create the structure
+- Run `python3 train_model.py --split` to auto-split from train to val
+
+### Exporting Fails
+- Ensure training completed and `runs/detect/*/weights/best.pt` exists
+- Check disk space
+- Try `--model n` for smaller export
+
+### Model Not Detecting
+- Check that bounding boxes in labels are correct
+- Lower `confidence_threshold` in config.json
+- Retrain with more diverse data
+- Verify the model loads: `python3 -c "from ultralytics import YOLO; YOLO('cs2head.onnx')"`

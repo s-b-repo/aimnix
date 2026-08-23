@@ -83,10 +83,24 @@ case $DIST in
     arch|manjaro|endeavouros|garuda)
         install_packages "base-devel cmake pkgconf opencv libevdev gst-plugins-good"
         if ! pacman -Qi onnxruntime &> /dev/null 2>&1; then
-            echo "[+] Installing onnxruntime (AUR may be needed)..."
-            sudo pacman -S --noconfirm onnxruntime 2>/dev/null || {
-                echo "[!] onnxruntime not in repos. Install from AUR."
+            echo "[+] Installing onnxruntime..."
+            sudo pacman -S --noconfirm onnxruntime-cuda 2>/dev/null || {
+                echo "[!] Trying onnxruntime-cpu..."
+                sudo pacman -S --noconfirm onnxruntime-cpu 2>/dev/null || true
             }
+        fi
+        # Download onnxruntime C++ headers if not present
+        if [ ! -f "third_party/onnxruntime/include/onnxruntime_cxx_api.h" ]; then
+            echo "[+] Downloading onnxruntime C++ headers..."
+            ORT_VERSION="1.28.0"
+            wget -q "https://github.com/microsoft/onnxruntime/releases/download/v${ORT_VERSION}/onnxruntime-linux-x64-${ORT_VERSION}.tgz" -O /tmp/ort-headers.tgz 2>/dev/null && {
+                mkdir -p third_party/onnxruntime/include third_party/onnxruntime/lib
+                tar xzf /tmp/ort-headers.tgz -C /tmp/
+                cp /tmp/onnxruntime-linux-x64-${ORT_VERSION}/include/*.h third_party/onnxruntime/include/
+                cp -r /tmp/onnxruntime-linux-x64-${ORT_VERSION}/include/core third_party/onnxruntime/include/
+                cp /tmp/onnxruntime-linux-x64-${ORT_VERSION}/lib/libonnxruntime.so* third_party/onnxruntime/lib/ 2>/dev/null || true
+                echo "[+] onnxruntime headers installed in third_party/onnxruntime/"
+            } || echo "[!] Could not download headers; compilation may fail"
         fi
         ;;
     fedora|nobara)
@@ -182,17 +196,74 @@ fi
 echo ""
 echo "[+] Compiling..."
 if [ -f "cs2-cv-aimbot-improved.cpp" ]; then
-    g++ -std=c++20 -O3 cs2-cv-aimbot-improved.cpp \
-        $(pkg-config --cflags --libs opencv4) \
-        -lonnxruntime \
-        -levdev \
-        -lpthread \
-        -o cs2-aimbot-enhanced 2>&1
+    # Detect OpenCV pkg-config name (opencv4 vs opencv5)
+    if pkg-config --exists opencv4 2>/dev/null; then
+        OPENCV_CFLAGS=$(pkg-config --cflags opencv4)
+        OPENCV_LIBS=$(pkg-config --libs opencv4)
+    elif pkg-config --exists opencv5 2>/dev/null; then
+        OPENCV_CFLAGS=$(pkg-config --cflags opencv5)
+        OPENCV_LIBS=$(pkg-config --libs opencv5)
+    elif pkg-config --exists opencv 2>/dev/null; then
+        OPENCV_CFLAGS=$(pkg-config --cflags opencv)
+        OPENCV_LIBS=$(pkg-config --libs opencv)
+    else
+        echo "[!] OpenCV not found via pkg-config. Trying direct linking..."
+        OPENCV_CFLAGS=""
+        OPENCV_LIBS="-lopencv_core -lopencv_imgproc -lopencv_highgui -lopencv_dnn -lopencv_videoio"
+    fi
+
+    # Detect libevdev pkg-config
+    if pkg-config --exists libevdev 2>/dev/null; then
+        EVDEV_CFLAGS=$(pkg-config --cflags libevdev)
+    else
+        EVDEV_CFLAGS=""
+    fi
+
+    # Check if onnxruntime headers are available
+    ONNX_INC=""
+    ONNX_LIB=""
+    if [ -d "third_party/onnxruntime/include" ]; then
+        ONNX_INC="-I third_party/onnxruntime/include"
+        ONNX_LIB="-L third_party/onnxruntime/lib -Wl,-rpath,third_party/onnxruntime/lib"
+        echo "[+] Using bundled onnxruntime in third_party/"
+    elif pkg-config --exists onnxruntime 2>/dev/null; then
+        ONNX_INC=$(pkg-config --cflags onnxruntime)
+        ONNX_LIB=$(pkg-config --libs onnxruntime)
+    fi
+
+    # Try full opencv libs first, fall back to specific modules if VTK/HDF5 deps are missing
+    if [ -n "$OPENCV_LIBS" ]; then
+        g++ -std=c++20 -O3 cs2-cv-aimbot-improved.cpp \
+            $OPENCV_CFLAGS $OPENCV_LIBS \
+            $EVDEV_CFLAGS $ONNX_INC $ONNX_LIB \
+            -lonnxruntime \
+            -levdev \
+            -lpthread \
+            -o cs2-aimbot-enhanced 2>&1
+    fi
+
+    # If that failed (or OPENCV_LIBS was empty), try with specific modules only
+    if [ ! -f "cs2-aimbot-enhanced" ] || [ $? -ne 0 ]; then
+        echo "[+] Retrying with specific OpenCV modules (avoids VTK/HDF5 deps)..."
+        g++ -std=c++20 -O3 cs2-cv-aimbot-improved.cpp \
+            $OPENCV_CFLAGS $EVDEV_CFLAGS $ONNX_INC $ONNX_LIB \
+            -lonnxruntime \
+            -lopencv_core -lopencv_imgproc -lopencv_highgui \
+            -lopencv_dnn -lopencv_videoio \
+            -levdev \
+            -lpthread \
+            -Wl,-rpath,third_party/onnxruntime/lib \
+            -o cs2-aimbot-enhanced 2>&1
+    fi
 
     if [ $? -eq 0 ]; then
         echo "[+] Compilation successful: ./cs2-aimbot-enhanced"
     else
         echo "[!] Compilation failed. Check errors above."
+        echo "[!] Make sure onnxruntime headers and library are available:"
+        echo "    - Install system package: onnxruntime-cuda (Arch) or libonnxruntime-dev (Ubuntu)"
+        echo "    - Or download from https://github.com/microsoft/onnxruntime/releases"
+        echo "      and place in third_party/onnxruntime/"
         exit 1
     fi
 else

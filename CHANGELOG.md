@@ -1,5 +1,20 @@
 # Changelog
 
+## v3.1 (EndeavourOS Setup Update)
+### Setup Script
+- Added bundled ONNX Runtime headers/library download from GitHub releases
+- Auto-detects OpenCV pkg-config name (opencv4 / opencv5 / opencv)
+- Falls back to specific OpenCV module linking to avoid VTK/HDF5 dependency errors
+- Added `onnxruntime-cuda` and `onnxruntime-cpu` package support for Arch
+- Improved onnxruntime header detection (checks `third_party/` first, then pkg-config)
+
+### Documentation
+- Updated README.md with EndeavourOS/Arch manual setup instructions
+- Populated README_ENHANCED.md with features, architecture, and troubleshooting
+- Updated TRAINING_GUIDE.md with venv activation steps and corrected commands
+
+---
+
 ## v3.0
 
 ### Aim Engine
